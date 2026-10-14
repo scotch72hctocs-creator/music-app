@@ -1,4 +1,4 @@
-// 💡 曲の仮データ
+// 💡 曲のデータ（後からいくらでも自由に追加・変更できます）
 const artistData = {
     "宇多田ヒカル": [
         { album: "First Love", tracks: ["Automatic", "First Love", "Movin' on without you"] },
@@ -10,6 +10,7 @@ const artistData = {
     ]
 };
 
+// 💡 年代別の楽曲データ
 const eraData = {
     "1990年代": [
         { title: "First Love", artist: "宇多田ヒカル" },
@@ -22,14 +23,7 @@ const eraData = {
     ]
 };
 
-const youtubeMap = {
-    "Automatic": "RnkV01Fx5bY", "First Love": "o1sUaVJUeB0", "Movin' on without you": "266zI_bMUEg",
-    "One Last Kiss": "0Uhh62MUEic", "君に夢中": "5YnvOyAtVZs", "BADモード": "a_S_bA5aX6M",
-    "Cry Baby": "O1bhZgkC4Gw", "Universe": "EOZfU_1pIDY", "Anarchy": "H6G6z836gG0",
-    "Pretender": "TQ8WlA2GXbk", "宿命": "-kgOFJG5E94", "I LOVE...": "bt8wNQJaKAk"
-};
-
-// 📑 タブ切り替え
+// 📑 画面切り替えタブの制御
 function switchTab(tabId, buttonElement) {
     document.querySelectorAll('.content-view').forEach(view => view.classList.remove('active'));
     document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
@@ -38,7 +32,7 @@ function switchTab(tabId, buttonElement) {
     if (tabId === 'eraTab') { renderEraList(); }
 }
 
-// 🔍 歌手検索
+// 🔍 歌手名検索の関数
 function searchArtist() {
     const input = document.getElementById("artistInput").value.trim();
     const resultsDiv = document.getElementById("searchResults");
@@ -48,7 +42,7 @@ function searchArtist() {
 
     const albums = artistData[input];
     if (!albums) {
-        resultsDiv.innerHTML = `<p style="text-align:center; color:#aaa;">「${input}」のデータが見つかりませんでした。</p>`;
+        resultsDiv.innerHTML = `<p style="text-align:center; color:#aaa;">「${input}」のデータが見つかりませんでした。<br>(※「宇多田ヒカル」または「Official髭男dism」で試してください)</p>`;
         return;
     }
 
@@ -69,6 +63,7 @@ function searchArtist() {
             const trackItem = document.createElement("div");
             trackItem.className = "track-item";
             trackItem.innerHTML = `<span>▶ ${track}</span>`;
+            // クリック時に曲名とアーティスト名を再生関数に渡す
             trackItem.onclick = () => playMusic(track, input);
             trackList.appendChild(trackItem);
         });
@@ -79,7 +74,7 @@ function searchArtist() {
     });
 }
 
-// 🗓️ 年代別表示
+// 🗓️ 年代別一覧を表示する関数
 function renderEraList() {
     const eraDiv = document.getElementById("eraResults");
     eraDiv.innerHTML = "";
@@ -97,6 +92,7 @@ function renderEraList() {
             const trackItem = document.createElement("div");
             trackItem.className = "track-item";
             trackItem.innerHTML = `<span>▶ ${song.title}</span><span class="artist-badge">${song.artist}</span>`;
+            // クリック時に再生関数に渡す
             trackItem.onclick = () => playMusic(song.title, song.artist);
             section.appendChild(trackItem);
         });
@@ -104,25 +100,21 @@ function renderEraList() {
     }
 }
 
+// アルバムの開閉制御
 function toggleAlbum(id) {
     const trackList = document.getElementById(id);
     const isVisible = trackList.style.display === "block";
     trackList.style.display = isVisible ? "none" : "block";
 }
 
-// 🎵 再生処理
+// 🎵 曲をクリックしたときに公式アプリ（YouTube）を開いて確実にフル再生する関数
 function playMusic(trackName, artistName) {
-    const playerContainer = document.getElementById("globalPlayer");
-    const playerTitle = document.getElementById("playerTitle");
-    const iframe = document.getElementById("youtubeIframe");
+    // 検索用のキーワードを自動作成 (例: "宇多田ヒカル First Love")
+    const searchKeyword = encodeURIComponent(`${artistName} ${trackName}`);
+    
+    // YouTubeアプリを起動して検索結果を表示するURL
+    const targetUrl = `https://youtube.com{searchKeyword}`;
 
-    playerTitle.innerText = `再生中 ♫ : ${trackName} / ${artistName}`;
-
-    const videoId = youtubeMap[trackName];
-    if (videoId) {
-        iframe.src = `https://youtube.com{videoId}?autoplay=1`;
-        playerContainer.style.display = "block";
-    } else {
-        alert("動画データが見つかりませんでした。");
-    }
+    // スマホのYouTubeにバトンタッチして音楽を流す
+    window.open(targetUrl, '_blank');
 }
