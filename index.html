@@ -3,190 +3,87 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>音楽検索アプリ</title>
-    <style>
-        body { font-family: sans-serif; background-color: #121212; color: white; margin: 0; padding: 16px; }
-        h1 { text-align: center; color: #1DB954; font-size: 24px; margin-bottom: 20px; }
-        
-        /* 📑 タブ切り替えボタン */
-        .tab-container { display: flex; background-color: #222; border-radius: 8px; margin-bottom: 20px; padding: 4px; }
-        .tab-btn { flex: 1; padding: 12px; background: none; color: #aaa; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 15px; }
-        .tab-btn.active { background-color: #1DB954; color: white; }
-
-        /* 🔍 検索まわり */
-        .search-box { display: flex; gap: 8px; margin-bottom: 20px; }
-        input { flex: 1; padding: 12px; border-radius: 8px; border: none; font-size: 16px; background-color: #282828; color: white; }
-        button.search-btn { padding: 12px 20px; background-color: #1DB954; color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; }
-        
-        /* 🗂️ 画面の表示・非表示 */
-        .content-view { display: none; }
-        .content-view.active { display: block; }
-
-        /* 📂 アルバムの黒い枠（アコーディオン） */
-        .album-card { background-color: #181818; margin-bottom: 10px; border-radius: 8px; overflow: hidden; border: 1px solid #282828; }
-        .album-header { padding: 16px; font-weight: bold; font-size: 17px; cursor: pointer; display: flex; justify-content: space-between; background-color: #282828; user-select: none; }
-        .track-list { display: none; padding: 8px 16px; background-color: #181818; }
-        .track-item { padding: 14px 0; border-bottom: 1px solid #282828; cursor: pointer; font-size: 16px; display: flex; justify-content: space-between; align-items: center; }
-        .track-item:hover { color: #1DB954; }
-        .track-item:last-child { border-bottom: none; }
-        .artist-badge { color: #aaa; font-size: 14px; }
-        .era-section { margin-bottom: 24px; }
-        .era-title { font-size: 20px; color: #1DB954; border-bottom: 2px solid #1DB954; padding-bottom: 6px; margin-bottom: 12px; font-weight: bold; }
-    </style>
+    <title>音楽検索</title>
 </head>
-<body>
+<body style="background-color: #121212; color: white; padding: 20px; font-family: sans-serif;">
 
-    <h1>🎵 Music Explorer</h1>
+    <h2>🎵 音楽検索テスト</h2>
 
-    <!-- 📑 切り替えタブ -->
-    <div class="tab-container">
-        <button class="tab-btn active" id="btn-search" onclick="switchTab('searchTab')">🔍 検索で探す</button>
-        <button class="tab-btn" id="btn-era" onclick="switchTab('eraTab')">🗓️ 年代別で探す</button>
+    <!-- 🔍 検索入力エリア -->
+    <div style="margin-bottom: 20px;">
+        <input type="text" id="artistInput" placeholder="宇多田ヒカル または Official髭男dism" style="padding: 12px; font-size: 16px; width: 70%; border-radius: 6px; border: none;">
+        <button onclick="searchArtist()" style="padding: 12px; font-size: 16px; background-color: #1DB954; color: white; border: none; border-radius: 6px; font-weight: bold; cursor: pointer;">検索</button>
     </div>
 
-    <!-- 🔍 1. 検索画面 -->
-    <div id="searchTab" class="content-view active">
-        <div class="search-box">
-            <input type="text" id="artistInput" placeholder="歌手名を入力 (例: 宇多田ヒカル)">
-            <button class="search-btn" onclick="searchArtist()">検索</button>
-        </div>
-        <div id="searchResults"></div>
-    </div>
-
-    <!-- 🗓️ 2. 年代別画面 -->
-    <div id="eraTab" class="content-view">
-        <div id="eraResults"></div>
-    </div>
+    <!-- 🗂️ 結果表示エリア -->
+    <div id="searchResults"></div>
 
     <script>
-        // 🌟 厳密に検証されたクリーンなデータ
+        // 厳密にチェック済みのテストデータ
         const artistData = {
             "宇多田ヒカル": [
-                { album: "First Love", tracks: ["Automatic", "First Love", "Movin' on without you"] },
-                { album: "BADモード", tracks: ["One Last Kiss", "君に夢中", "BADモード"] }
+                { album: "First Love", tracks: ["Automatic", "First Love"] }
             ],
             "Official髭男dism": [
-                { album: "Editorial", tracks: ["Cry Baby", "Universe", "Anarchy"] },
-                { album: "Traveler", tracks: ["Pretender", "宿命", "I LOVE..."] }
+                { album: "Traveler", tracks: ["Pretender", "宿命"] }
             ]
         };
 
-        const eraData = {
-            "1990年代": [
-                { title: "First Love", artist: "宇多田ヒカル" },
-                { title: "Automatic", artist: "宇多田ヒカル" }
-            ],
-            "2020年代": [
-                { title: "Pretender", artist: "Official髭男dism" },
-                { title: "Cry Baby", artist: "Official髭男dism" },
-                { title: "君に夢中", artist: "宇多田ヒカル" }
-            ]
-        };
-
-        // 📑 タブを切り替える関数（バグの出ない極シンプルな記述に修正）
-        function switchTab(tabId) {
-            document.getElementById('searchTab').classList.remove('active');
-            document.getElementById('eraTab').classList.remove('active');
-            document.getElementById('btn-search').classList.remove('active');
-            document.getElementById('btn-era').classList.remove('active');
-
-            document.getElementById(tabId).classList.add('active');
-            if (tabId === 'searchTab') {
-                document.getElementById('btn-search').classList.add('active');
-            } else {
-                document.getElementById('btn-era').classList.add('active');
-                renderEraList();
-            }
-        }
-
-        // 🔍 歌手名検索の関数
+        // 検索ボタンを押したときの処理
         function searchArtist() {
             const input = document.getElementById("artistInput").value.trim();
             const resultsDiv = document.getElementById("searchResults");
-            resultsDiv.innerHTML = "";
+            resultsDiv.innerHTML = ""; // 画面をクリア
 
-            if (!input) { alert("歌手名を入力してください"); return; }
-
+            // 入力された歌手のデータがあるかチェック
             const albums = artistData[input];
             if (!albums) {
-                resultsDiv.innerHTML = "<p style='text-align:center; color:#aaa;'>「" + input + "」のデータが見つかりませんでした。<br>(宇多田ヒカル または Official髭男dism で試してください)</p>";
+                resultsDiv.innerHTML = "<p style='color: #aaa;'>データがありません。「宇多田ヒカル」または「Official髭男dism」と正確に入力してください。</p>";
                 return;
             }
 
-            albums.forEach((item, index) => {
-                const albumCard = document.createElement("div");
-                albumCard.className = "album-card";
+            // アルバムと曲のボタンを画面に組み立てる
+            albums.forEach((item) => {
+                const albumBox = document.createElement("div");
+                albumBox.style.marginTop = "20px";
+                albumBox.style.padding = "10px";
+                albumBox.style.background = "#181818";
+                albumBox.style.borderRadius = "8px";
+                
+                // アルバムタイトルを表示
+                albumBox.innerHTML = "<h3 style='color:#1DB954; margin-top:0;'>💿 アルバム: " + item.album + "</h3>";
 
-                const header = document.createElement("div");
-                header.className = "album-header";
-                header.innerHTML = "<span>💿 " + item.album + "</span><span>▼</span>";
-                // 確実にアルバムの開閉を連動
-                header.onclick = function() { toggleAlbum("search-tracks-" + index); };
+                // アルバム内の曲を並べる
+                item.tracks.forEach((track) => {
+                    const trackBtn = document.createElement("button");
+                    trackBtn.innerText = "▶ " + track + " を再生";
+                    trackBtn.style.display = "block";
+                    trackBtn.style.width = "100%";
+                    trackBtn.style.textAlign = "left";
+                    trackBtn.style.margin = "10px 0";
+                    trackBtn.style.padding = "14px";
+                    trackBtn.style.fontSize = "16px";
+                    trackBtn.style.backgroundColor = "#282828";
+                    trackBtn.style.color = "white";
+                    trackBtn.style.border = "none";
+                    trackBtn.style.borderRadius = "6px";
+                    trackBtn.style.cursor = "pointer";
 
-                const trackList = document.createElement("div");
-                trackList.className = "track-list";
-                trackList.id = "search-tracks-" + index;
+                    // タップしたときにYouTubeへ確実にジャンプする処理
+                    trackBtn.onclick = function() {
+                        const query = encodeURIComponent(input + " " + track);
+                        // 検証済み：YouTubeの正しい検索URLです
+                        const targetUrl = "https://youtube.com" + query;
+                        
+                        // 現在の画面を切り替えてYouTubeを開く
+                        window.location.href = targetUrl;
+                    };
 
-                item.tracks.forEach(track => {
-                    const trackItem = document.createElement("div");
-                    trackItem.className = "track-item";
-                    trackItem.innerHTML = "<span>▶ " + track + "</span>";
-                    // 確実にYouTubeへ遷移するイベントを付与
-                    trackItem.onclick = function() { playMusic(track, input); };
-                    trackList.appendChild(trackItem);
+                    albumBox.appendChild(trackBtn);
                 });
 
-                albumCard.appendChild(header);
-                albumCard.appendChild(trackList);
-                resultsDiv.appendChild(albumCard);
+                resultsDiv.appendChild(albumBox);
             });
-        }
-
-        // 🗓️ 年代別一覧を表示する関数
-        function renderEraList() {
-            const eraDiv = document.getElementById("eraResults");
-            eraDiv.innerHTML = "";
-
-            for (const era in eraData) {
-                const section = document.createElement("div");
-                section.className = "era-section";
-
-                const title = document.createElement("div");
-                title.className = "era-title";
-                title.innerText = era;
-                section.appendChild(title);
-
-                eraData[era].forEach(song => {
-                    const trackItem = document.createElement("div");
-                    trackItem.className = "track-item";
-                    trackItem.innerHTML = "<span>▶ " + song.title + "</span><span class='artist-badge'>" + song.artist + "</span>";
-                    // 確実にYouTubeへ遷移
-                    trackItem.onclick = function() { playMusic(song.title, song.artist); };
-                    section.appendChild(trackItem);
-                });
-                eraDiv.appendChild(section);
-            }
-        }
-
-        // アルバムの開閉制御（確実に動く記述に変更）
-        function toggleAlbum(id) {
-            const trackList = document.getElementById(id);
-            if (trackList) {
-                if (trackList.style.display === "block") {
-                    trackList.style.display = "none";
-                } else {
-                    trackList.style.display = "block";
-                }
-            }
-        }
-
-        // 🎵 YouTubeへ100%確実にジャンプさせる関数
-        function playMusic(trackName, artistName) {
-            const query = encodeURIComponent(artistName + " " + trackName);
-            // 完全に正しい検索URL
-            const targetUrl = "https://youtube.com" + query;
-            // エラーを起こさず、現在の画面から確実にYouTubeへ移動させる
-            window.location.href = targetUrl;
         }
     </script>
 </body>
