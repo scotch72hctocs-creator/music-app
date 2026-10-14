@@ -1,4 +1,4 @@
-// 💡 曲のデータ（後からいくらでも自由に追加・変更できます）
+// 💡 曲のデータ
 const artistData = {
     "宇多田ヒカル": [
         { album: "First Love", tracks: ["Automatic", "First Love", "Movin' on without you"] },
@@ -42,7 +42,7 @@ function searchArtist() {
 
     const albums = artistData[input];
     if (!albums) {
-        resultsDiv.innerHTML = `<p style="text-align:center; color:#aaa;">「${input}」のデータが見つかりませんでした。<br>(※「宇多田ヒカル」または「Official髭男dism」で試してください)</p>`;
+        resultsDiv.innerHTML = `<p style="text-align:center; color:#aaa;">「${input}」のデータが見つかりませんでした。</p>`;
         return;
     }
 
@@ -63,7 +63,7 @@ function searchArtist() {
             const trackItem = document.createElement("div");
             trackItem.className = "track-item";
             trackItem.innerHTML = `<span>▶ ${track}</span>`;
-            // クリック時に曲名とアーティスト名を再生関数に渡す
+            // クリック時にYouTubeへジャンプ
             trackItem.onclick = () => playMusic(track, input);
             trackList.appendChild(trackItem);
         });
@@ -92,7 +92,7 @@ function renderEraList() {
             const trackItem = document.createElement("div");
             trackItem.className = "track-item";
             trackItem.innerHTML = `<span>▶ ${song.title}</span><span class="artist-badge">${song.artist}</span>`;
-            // クリック時に再生関数に渡す
+            // クリック時にYouTubeへジャンプ
             trackItem.onclick = () => playMusic(song.title, song.artist);
             section.appendChild(trackItem);
         });
@@ -103,18 +103,20 @@ function renderEraList() {
 // アルバムの開閉制御
 function toggleAlbum(id) {
     const trackList = document.getElementById(id);
-    const isVisible = trackList.style.display === "block";
-    trackList.style.display = isVisible ? "none" : "block";
+    if (trackList) {
+        const isVisible = trackList.style.display === "block";
+        trackList.style.display = isVisible ? "none" : "block";
+    }
 }
 
-// 🎵 曲をクリックしたときに公式アプリ（YouTube）を開いて確実にフル再生する関数
+// 🎵 曲をクリックしたときにYouTubeを開く関数
 function playMusic(trackName, artistName) {
-    // 検索用のキーワードを自動作成 (例: "宇多田ヒカル First Love")
+    // 検索ワードを作成 (例: "宇多田ヒカル First Love")
     const searchKeyword = encodeURIComponent(`${artistName} ${trackName}`);
     
-    // YouTubeアプリを起動して検索結果を表示するURL
+    // YouTubeの検索結果URL
     const targetUrl = `https://youtube.com{searchKeyword}`;
 
-    // スマホのYouTubeにバトンタッチして音楽を流す
+    // スマホの新しい画面（YouTube）で開く
     window.open(targetUrl, '_blank');
 }
