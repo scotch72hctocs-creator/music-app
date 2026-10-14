@@ -10,11 +10,13 @@
 
     <h1>🎵 Music Explorer</h1>
 
+    <!-- 📑 切り替えタブ -->
     <div class="tab-container">
         <button class="tab-btn active" onclick="switchTab('searchTab', this)">🔍 検索で探す</button>
         <button class="tab-btn" onclick="switchTab('eraTab', this)">🗓️ 年代別で探す</button>
     </div>
 
+    <!-- 🔍 1. 検索画面 -->
     <div id="searchTab" class="content-view active">
         <div class="search-box">
             <input type="text" id="artistInput" placeholder="歌手名を入力 (例: 宇多田ヒカル)">
@@ -23,16 +25,12 @@
         <div id="searchResults"></div>
     </div>
 
+    <!-- 🗓️ 2. 年代別画面 -->
     <div id="eraTab" class="content-view">
         <div id="eraResults"></div>
     </div>
 
-    <div id="globalPlayer" class="player-container">
-        <div id="playerTitle" class="player-title">選択された曲を再生中</div>
-        <div class="video-wrapper">
-            <iframe id="youtubeIframe" src="" allow="autoplay; encrypted-media"></iframe>
-        </div>
-    </div>
+    <!-- 💡 古いプレイヤーの枠はトラブル防止のため完全に削除しました -->
 
     <!-- 動きを担当するJavaScriptファイルを読み込む -->
     <script src="app.js"></script>
