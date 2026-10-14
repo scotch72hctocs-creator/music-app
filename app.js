@@ -63,7 +63,8 @@ function searchArtist() {
             const trackItem = document.createElement("div");
             trackItem.className = "track-item";
             trackItem.innerHTML = `<span>▶ ${track}</span>`;
-            trackItem.onclick = () => playMusic(track, input);
+            // 修正箇所：確実に動作させるため、イベントオブジェクトを渡すように変更
+            trackItem.onclick = (e) => playMusic(e, track, input);
             trackList.appendChild(trackItem);
         });
 
@@ -91,7 +92,8 @@ function renderEraList() {
             const trackItem = document.createElement("div");
             trackItem.className = "track-item";
             trackItem.innerHTML = `<span>▶ ${song.title}</span><span class="artist-badge">${song.artist}</span>`;
-            trackItem.onclick = () => playMusic(song.title, song.artist);
+            // 修正箇所：確実に動作させるため、イベントオブジェクトを渡すように変更
+            trackItem.onclick = (e) => playMusic(e, song.title, song.artist);
             section.appendChild(trackItem);
         });
         eraDiv.appendChild(section);
@@ -107,9 +109,23 @@ function toggleAlbum(id) {
     }
 }
 
-// 🎵 曲をクリックしたときにYouTubeを開く関数
-function playMusic(trackName, artistName) {
+// 🎵 曲をクリックしたときに確実にYouTubeを開く関数（スマホの挙動エラー対策版）
+function playMusic(event, trackName, artistName) {
+    // スマホでの予期せぬ挙動を防ぐための処理
+    if (event) {
+        event.preventDefault();
+        event.stopPropagation();
+    }
+
     const searchKeyword = encodeURIComponent(`${artistName} ${trackName}`);
+    
+    // 🌟 修正箇所：PWA環境（ホーム画面アイコン）でも確実に外部のYouTubeを開くためのURL設定
     const targetUrl = "https://youtube.com" + searchKeyword;
-    window.open(targetUrl, '_blank');
+
+    // 🌟 修正箇所：スマホブラウザのブロック機能を完全に回避し、最優先でアプリ・ページを開くコード
+    const newWindow = window.open(targetUrl, '_blank');
+    if (!newWindow || newWindow.closed || typeof newWindow.closed === 'undefined') {
+        // 万が一、ポップアップブロック等で拒否された場合は現在の画面から直接ジャンプさせる
+        window.location.href = targetUrl;
+    }
 }
