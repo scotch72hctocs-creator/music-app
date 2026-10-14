@@ -7,44 +7,35 @@
 </head>
 <body style="background-color: #121212; color: white; padding: 20px; font-family: sans-serif;">
 
-    <h2>🎵 音楽検索テスト</h2>
-    <p style="color: #aaa; font-size: 14px;">※不具合の原因を完全に排除するため、ボタンを直接配置しています</p>
+    <h2>🎵 音楽検索テスト（リンク方式）</h2>
+    <p style="color: #aaa; font-size: 14px;">※スマホのブロック制限を完全に回避するため、直接リンクに変更しました</p>
 
     <!-- 💿 宇多田ヒカルのアルバムと曲 -->
     <div style="background-color: #181818; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
         <h3 style="color: #1DB954; margin-top: 0;">💿 アルバム: First Love / 宇多田ヒカル</h3>
-        <button onclick="playMusic('宇多田ヒカル', 'Automatic')" style="display: block; width: 100%; text-align: left; padding: 14px; margin: 8px 0; background-color: #282828; color: white; border: none; border-radius: 6px; font-size: 16px;">
-            ▶ Automatic を再生
-        </button>
-        <button onclick="playMusic('宇多田ヒカル', 'First Love')" style="display: block; width: 100%; text-align: left; padding: 14px; margin: 8px 0; background-color: #282828; color: white; border: none; border-radius: 6px; font-size: 16px;">
-            ▶ First Love を再生
-        </button>
+        
+        <!-- 🌟 プログラムを使わず、直接YouTubeのURLを埋め込んだ安全なリンクです -->
+        <a href="https://youtube.com" style="display: block; text-decoration: none; padding: 14px; margin: 8px 0; background-color: #282828; color: white; border-radius: 6px; font-size: 16px; font-weight: bold;">
+            ▶ Automatic をYouTubeで再生
+        </a>
+        
+        <a href="https://youtube.com" style="display: block; text-decoration: none; padding: 14px; margin: 8px 0; background-color: #282828; color: white; border-radius: 6px; font-size: 16px; font-weight: bold;">
+            ▶ First Love をYouTubeで再生
+        </a>
     </div>
 
     <!-- 💿 Official髭男dismのアルバムと曲 -->
     <div style="background-color: #181818; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
         <h3 style="color: #1DB954; margin-top: 0;">💿 アルバム: Traveler / Official髭男dism</h3>
-        <button onclick="playMusic('Official髭男dism', 'Pretender')" style="display: block; width: 100%; text-align: left; padding: 14px; margin: 8px 0; background-color: #282828; color: white; border: none; border-radius: 6px; font-size: 16px;">
-            ▶ Pretender を再生
-        </button>
-        <button onclick="playMusic('Official髭男dism', '宿命')" style="display: block; width: 100%; text-align: left; padding: 14px; margin: 8px 0; background-color: #282828; color: white; border: none; border-radius: 6px; font-size: 16px;">
-            ▶ 宿命 を再生
-        </button>
+        
+        <a href="https://youtube.com" style="display: block; text-decoration: none; padding: 14px; margin: 8px 0; background-color: #282828; color: white; border-radius: 6px; font-size: 16px; font-weight: bold;">
+            ▶ Pretender をYouTubeで再生
+        </a>
+        
+        <a href="https://youtube.com" style="display: block; text-decoration: none; padding: 14px; margin: 8px 0; background-color: #282828; color: white; border-radius: 6px; font-size: 16px; font-weight: bold;">
+            ▶ 宿命 をYouTubeで再生
+        </a>
     </div>
-
-    <script>
-        // 曲をクリックしたときに、確実にYouTubeの正しい検索画面へ移動する関数
-        function playMusic(artistName, trackName) {
-            // 検索キーワードを正しく安全に変換
-            const keyword = encodeURIComponent(artistName + " " + trackName);
-            
-            // 🌟 100%正しいYouTubeの検索URLを組み立て
-            const targetUrl = "https://youtube.com" + keyword;
-            
-            // 画面をYouTubeへ切り替える
-            window.location.href = targetUrl;
-        }
-    </script>
 
 </body>
 </html>
