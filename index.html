@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>音楽検索アプリ (試作版)</title>
+    <style>
+        /* 📱 スマホで見やすいシンプルなデザイン */
+        body { font-family: sans-serif; background-color: #121212; color: white; margin: 0; padding: 16px; }
+        h1 { text-align: center; color: #1DB954; font-size: 24px; }
+        .search-box { display: flex; gap: 8px; margin-bottom: 20px; }
+        input { flex: 1; padding: 12px; border-radius: 8px; border: none; font-size: 16px; }
+        button { padding: 12px; background-color: #1DB954; color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; }
+        
+        /* 📂 アルバムと曲名のアコーディオン構造 */
+        .album-card { background-color: #181818; margin-bottom: 10px; border-radius: 8px; overflow: hidden; border: 1px solid #282828; }
+        .album-header { padding: 16px; font-weight: bold; font-size: 18px; cursor: pointer; display: flex; justify-content: space-between; background-color: #282828; }
+        .album-header:hover { background-color: #333; }
+        .track-list { display: none; padding: 8px 16px; background-color: #181818; }
+        .track-item { padding: 10px 0; border-bottom: 1px solid #282828; cursor: pointer; font-size: 16px; }
+        .track-item:hover { color: #1DB954; }
+        .track-item:last-child { border-bottom: none; }
+    </style>
+</head>
+<body>
+
+    <h1>🎵 Music Explorer</h1>
+
+    <!-- 🔍 検索エリア -->
+    <div class="search-box">
+        <input type="text" id="artistInput" placeholder="歌手名を入力 (例: 宇多田ヒカル)">
+        <button onclick="searchArtist()">検索</button>
+    </div>
+
+    <!-- 🗂️ 結果表示エリア -->
+    <div id="results"></div>
+
+    <script>
+        // 💡 【後からの拡張用】テスト用の仮データ（のちにSpotify API等と入れ替えます）
+        const mockData = {
+            "宇多田ヒカル": [
+                { album: "First Love", tracks: ["Automatic", "First Love", "Movin' on without you"] },
+                { album: "BADモード", tracks: ["One Last Kiss", "君に夢中", "BADモード"] }
+            ],
+            "Official髭男dism": [
+                { album: "Editorial", tracks: ["Cry Baby", "Universe", "Anarchy"] },
+                { album: "Traveler", tracks: ["Pretender", "宿命", "I LOVE..."] }
+            ]
+        };
+
+        // 検索ボタンを押したときの処理
+        function searchArtist() {
+            const input = document.getElementById("artistInput").value.trim();
+            const resultsDiv = document.getElementById("results");
+            resultsDiv.innerHTML = ""; // 画面をクリア
+
+            if (!input) { alert("歌手名を入力してください"); return; }
+
+            // 該当するデータがあるか探す
+            const albums = mockData[input];
+
+            if (!albums) {
+                resultsDiv.innerHTML = `<p style="text-align:center; color:#aaa;">「${input}」のデータが見つかりませんでした。<br>(※試作版のため「宇多田ヒカル」または「Official髭男dism」で試してください)</p>`;
+                return;
+            }
+
+            // アルバムと曲のリストを画面に組み立てる
+            albums.forEach((item, index) => {
+                const albumCard = document.createElement("div");
+                albumCard.className = "album-card";
+
+                // アルバムのヘッダー（クリックで開閉）
+                const header = document.createElement("div");
+                header.className = "album-header";
+                header.innerHTML = `<span>💿 ${item.album}</span><span>▼</span>`;
+                header.onclick = () => toggleAlbum(index);
+
+                // 曲名のリスト
+                const trackList = document.createElement("div");
+                trackList.className = "track-list";
+                trackList.id = `tracks-${index}`;
+
+                item.tracks.forEach(track => {
+                    const trackItem = document.createElement("div");
+                    trackItem.className = "track-item";
+                    trackItem.innerText = `▶ ${track}`;
+                    // 💡 【後からの拡張用】ここをクリックしたときに再生アプリを動かします
+                    trackItem.onclick = () => alert(`「${track}」を再生する機能をここに後から追加します！`);
+                    trackList.appendChild(trackItem);
+                });
+
+                albumCard.appendChild(header);
+                albumCard.appendChild(trackList);
+                resultsDiv.appendChild(albumCard);
+            });
+        }
+
+        // アルバムの開閉（アコーディオン）を制御する関数
+        function toggleAlbum(index) {
+            const trackList = document.getElementById(`tracks-${index}`);
+            const isVisible = trackList.style.display === "block";
+            trackList.style.style.display = isVisible ? "none" : "block";
+        }
+    </script>
+</body>
+</html>
