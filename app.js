@@ -63,7 +63,6 @@ function searchArtist() {
             const trackItem = document.createElement("div");
             trackItem.className = "track-item";
             trackItem.innerHTML = `<span>▶ ${track}</span>`;
-            // クリック時にYouTubeへジャンプ
             trackItem.onclick = () => playMusic(track, input);
             trackList.appendChild(trackItem);
         });
@@ -92,7 +91,6 @@ function renderEraList() {
             const trackItem = document.createElement("div");
             trackItem.className = "track-item";
             trackItem.innerHTML = `<span>▶ ${song.title}</span><span class="artist-badge">${song.artist}</span>`;
-            // クリック時にYouTubeへジャンプ
             trackItem.onclick = () => playMusic(song.title, song.artist);
             section.appendChild(trackItem);
         });
@@ -111,12 +109,7 @@ function toggleAlbum(id) {
 
 // 🎵 曲をクリックしたときにYouTubeを開く関数
 function playMusic(trackName, artistName) {
-    // 検索ワードを作成 (例: "宇多田ヒカル First Love")
     const searchKeyword = encodeURIComponent(`${artistName} ${trackName}`);
-    
-    // YouTubeの検索結果URL
-    const targetUrl = `https://youtube.com{searchKeyword}`;
-
-    // スマホの新しい画面（YouTube）で開く
+    const targetUrl = "https://youtube.com" + searchKeyword;
     window.open(targetUrl, '_blank');
 }
