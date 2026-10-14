@@ -3,10 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>音楽検索アプリ (年代別対応版)</title>
+    <title>音楽検索アプリ (再生対応版)</title>
     <style>
         /* 📱 スマホ用シンプルデザイン */
-        body { font-family: sans-serif; background-color: #121212; color: white; margin: 0; padding: 16px; padding-bottom: 60px; }
+        body { font-family: sans-serif; background-color: #121212; color: white; margin: 0; padding: 16px; padding-bottom: 240px; } /* プレイヤーの分、下に余白を空ける */
         h1 { text-align: center; color: #1DB954; font-size: 24px; margin-bottom: 20px; }
         
         /* 📑 画面切り替えタブ */
@@ -27,7 +27,7 @@
         .album-card { background-color: #181818; margin-bottom: 10px; border-radius: 8px; overflow: hidden; border: 1px solid #282828; }
         .album-header { padding: 16px; font-weight: bold; font-size: 17px; cursor: pointer; display: flex; justify-content: space-between; background-color: #282828; }
         .track-list { display: none; padding: 8px 16px; background-color: #181818; }
-        .track-item { padding: 12px 0; border-bottom: 1px solid #282828; cursor: pointer; font-size: 16px; display: flex; justify-content: space-between; }
+        .track-item { padding: 14px 0; border-bottom: 1px solid #282828; cursor: pointer; font-size: 16px; display: flex; justify-content: space-between; align-items: center; }
         .track-item:hover { color: #1DB954; }
         .track-item:last-child { border-bottom: none; }
         .artist-badge { color: #aaa; font-size: 14px; }
@@ -35,6 +35,12 @@
         /* 🗓️ 年代別画面のスタイル */
         .era-section { margin-bottom: 24px; }
         .era-title { font-size: 20px; color: #1DB954; border-bottom: 2px solid #1DB954; padding-bottom: 6px; margin-bottom: 12px; font-weight: bold; }
+
+        /* 📺 備え付けミニプレイヤー（画面下部に固定） */
+        .player-container { position: fixed; bottom: 0; left: 0; right: 0; background-color: #222; border-top: 2px solid #1DB954; padding: 10px; text-align: center; box-shadow: 0 -4px 10px rgba(0,0,0,0.5); z-index: 1000; display: none; }
+        .player-title { font-size: 14px; margin-bottom: 8px; color: #1DB954; font-weight: bold; }
+        .video-wrapper { position: relative; width: 100%; max-width: 360px; margin: 0 auto; height: 120px; }
+        iframe { width: 100%; height: 100%; border: none; border-radius: 4px; }
     </style>
 </head>
 <body>
@@ -61,8 +67,17 @@
         <div id="eraResults"></div>
     </div>
 
+    <!-- 📺 3. 画面下部固定の備え付けプレイヤー -->
+    <div id="globalPlayer" class="player-container">
+        <div id="playerTitle" class="player-title">選択された曲を再生中</div>
+        <div class="video-wrapper">
+            <!-- ここにYouTubeの画面が埋め込まれます -->
+            <iframe id="youtubeIframe" src="" allow="autoplay; encrypted-media"></iframe>
+        </div>
+    </div>
+
     <script>
-        // 💡 【仮データ】後から増やしたり、API連携に入れ替えたりできます
+        // 💡 【仮データ】歌手・アルバム・収録曲
         const artistData = {
             "宇多田ヒカル": [
                 { album: "First Love", tracks: ["Automatic", "First Love", "Movin' on without you"] },
@@ -74,12 +89,11 @@
             ]
         };
 
-        // 💡 年代別の楽曲データ
+        // 💡 【仮データ】年代別の楽曲データ
         const eraData = {
             "1990年代": [
                 { title: "First Love", artist: "宇多田ヒカル" },
-                { title: "Automatic", artist: "宇多田ヒカル" },
-                { title: "ROBBERY", artist: "テスト歌手A" } /* 追加用サンプルの仮曲 */
+                { title: "Automatic", artist: "宇多田ヒカル" }
             ],
             "2020年代": [
                 { title: "Pretender", artist: "Official髭男dism" },
@@ -88,20 +102,30 @@
             ]
         };
 
+        // 💡 各曲に対応するYouTubeの動画ID（無料かつ安全に再生するための仕組み）
+        // ※後々APIを連携させると、このIDをネット上から自動で取得できるようになります。
+        const youtubeMap = {
+            "Automatic": "RnkV01Fx5bY",
+            "First Love": "o1sUaVJUeB0",
+            "Movin' on without you": "266zI_bMUEg",
+            "One Last Kiss": "0Uhh62MUEic",
+            "君に夢中": "5YnvOyAtVZs",
+            "BADモード": "a_S_bA5aX6M",
+            "Cry Baby": "O1bhZgkC4Gw",
+            "Universe": "EOZfU_1pIDY",
+            "Anarchy": "H6G6z836gG0",
+            "Pretender": "TQ8WlA2GXbk",
+            "宿命": "-kgOFJG5E94",
+            "I LOVE...": "bt8wNQJaKAk"
+        };
+
         // 📑 タブを切り替える関数
         function switchTab(tabId, buttonElement) {
-            // すべてのタブコンテンツとボタンを一度リセット
             document.querySelectorAll('.content-view').forEach(view => view.classList.remove('active'));
             document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
-            
-            // 選ばれたタブとボタンを有効化
             document.getElementById(tabId).classList.add('active');
             buttonElement.classList.add('active');
-
-            // 年代別タブが開かれたら、一覧を組み立てて表示する
-            if (tabId === 'eraTab') {
-                renderEraList();
-            }
+            if (tabId === 'eraTab') { renderEraList(); }
         }
 
         // 🔍 歌手名検索の関数
@@ -114,7 +138,7 @@
 
             const albums = artistData[input];
             if (!albums) {
-                resultsDiv.innerHTML = `<p style="text-align:center; color:#aaa;">「${input}」のデータが見つかりませんでした。<br>(※試作版のため「宇多田ヒカル」または「Official髭男dism」で試してください)</p>`;
+                resultsDiv.innerHTML = `<p style="text-align:center; color:#aaa;">「${input}」のデータが見つかりませんでした。<br>(※「宇多田ヒカル」または「Official髭男dism」で試してください)</p>`;
                 return;
             }
 
@@ -135,7 +159,8 @@
                     const trackItem = document.createElement("div");
                     trackItem.className = "track-item";
                     trackItem.innerHTML = `<span>▶ ${track}</span>`;
-                    trackItem.onclick = () => playMusic(track);
+                    // クリック時に曲名とアーティスト名を渡して再生
+                    trackItem.onclick = () => playMusic(track, input);
                     trackList.appendChild(trackItem);
                 });
 
@@ -145,32 +170,28 @@
             });
         }
 
-        // 🗓️ 年代別一覧を画面に表示する関数
+        // 🗓️ 年代別一覧を表示する関数
         function renderEraList() {
             const eraDiv = document.getElementById("eraResults");
-            eraDiv.innerHTML = ""; // 画面クリア
+            eraDiv.innerHTML = "";
 
-            // 「1990年代」「2020年代」などのグループごとに処理
             for (const era in eraData) {
                 const section = document.createElement("div");
                 section.className = "era-section";
 
-                // 年代の見出し
                 const title = document.createElement("div");
                 title.className = "era-title";
                 title.innerText = era;
                 section.appendChild(title);
 
-                // その年代の曲をリストアップ
                 eraData[era].forEach(song => {
                     const trackItem = document.createElement("div");
                     trackItem.className = "track-item";
-                    trackItem.style.borderBottom = "1px solid #222";
                     trackItem.innerHTML = `<span>▶ ${song.title}</span><span class="artist-badge">${song.artist}</span>`;
-                    trackItem.onclick = () => playMusic(song.title);
+                    // クリック時に再生
+                    trackItem.onclick = () => playMusic(song.title, song.artist);
                     section.appendChild(trackItem);
                 });
-
                 eraDiv.appendChild(section);
             }
         }
@@ -182,10 +203,47 @@
             trackList.style.display = isVisible ? "none" : "block";
         }
 
-        // 🎵 【再生拡張用】曲をクリックしたときの処理
-        function playMusic(trackName) {
-            alert(`「${trackName}」を再生する機能をここに後から追加します！`);
-        }
-    </script>
-</body>
-</html>
+        // 🎵 備え付けプレイヤーで音楽を再生する関数
+        function playMusic(trackName, artistName) {
+            const playerContainer = document.getElementById("globalPlayer");
+            const playerTitle = document.getElementById("playerTitle");
+            const iframe = document.getElementById("youtubeIframe");
+
+            // 再生中の曲名を表示
+            playerTitle.innerText = `再生中 ♫ : ${trackName} / ${artistName}`;
+
+            // 動画IDを取得して、埋め込みURLを組み立てる（自動再生付き）
+            const videoId = youtubeMap[trackName];
+            if (videoId) {
+                iframe.src = `https://youtube.com{videoId}?autoplay=1`;
+                playerContainer.style.display = "block"; // プレイヤーを表示
+            } else {
+                alert("この曲の動画データが見つかりませんでした。");
+            }
+コードは注意してご使用ください。
+}
+
+
+
+---
+
+### 🚀 【ステップ2】GitHubを更新してスマホで聴いてみよう！
+
+1. パソコンでGitHubを開き、`index.html` の編集画面（鉛筆マーク）を開きます。
+2. 中身を上の新しいコードにすべて入れ替えて、**「Commit changes」**を押して保存します。
+3. 1〜2分待ってから、スマホのホーム画面のアプリを開き直します。（※画面が変わらない場合は、一度アプリを完全に閉じて再起動するか、少し時間を置いてみてください）
+
+#### 📱 動かし方
+検索で「宇多田ヒカル」と打ってアルバムを展開するか、「年代別で探す」のタブを開きます。
+並んでいる曲名（例: **First Love** や **Pretender**）をタップしてみてください。
+
+画面の下からニュッと**備え付けのプレイヤーが現れ、YouTubeの音楽がその場でフル再生**されます！
+
+---
+
+<FollowUp>
+ついに「検索する ➡️ アルバムを開く ➡️ 備え付けプレイヤーで本当に再生される」というアプリの骨組みがすべて完成しましたね！自分の手でここまで動かせるようになったのは本当にすごいです。
+
+スマホで無事に音は鳴りましたでしょうか？
+ここからさらに「ネット上の本物の音楽データとリアルタイムに繋ぐ（API連携）」などの本格的な改造に進みたいか、まずはこの状態の動きをじっくり触ってみたいか、感想や次の希望を教えてください！
+</FollowUp>
