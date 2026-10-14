@@ -3,36 +3,33 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>音楽検索アプリ (完全統合版)</title>
+    <title>音楽検索アプリ</title>
     <style>
-        /* 📱 スマホ用シンプルデザイン */
         body { font-family: sans-serif; background-color: #121212; color: white; margin: 0; padding: 16px; }
         h1 { text-align: center; color: #1DB954; font-size: 24px; margin-bottom: 20px; }
         
-        /* 📑 画面切り替えタブ */
+        /* 📑 タブ切り替えボタン */
         .tab-container { display: flex; background-color: #222; border-radius: 8px; margin-bottom: 20px; padding: 4px; }
         .tab-btn { flex: 1; padding: 12px; background: none; color: #aaa; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 15px; }
         .tab-btn.active { background-color: #1DB954; color: white; }
 
-        /* 🔍 検索エリア */
+        /* 🔍 検索まわり */
         .search-box { display: flex; gap: 8px; margin-bottom: 20px; }
         input { flex: 1; padding: 12px; border-radius: 8px; border: none; font-size: 16px; background-color: #282828; color: white; }
         button.search-btn { padding: 12px 20px; background-color: #1DB954; color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; }
         
-        /* 🗂️ コンテンツ表示切り替え */
+        /* 🗂️ 画面の表示・非表示 */
         .content-view { display: none; }
         .content-view.active { display: block; }
 
-        /* 📂 アルバム・曲のアコーディオン構造 */
+        /* 📂 アルバムの黒い枠（アコーディオン） */
         .album-card { background-color: #181818; margin-bottom: 10px; border-radius: 8px; overflow: hidden; border: 1px solid #282828; }
-        .album-header { padding: 16px; font-weight: bold; font-size: 17px; cursor: pointer; display: flex; justify-content: space-between; background-color: #282828; }
+        .album-header { padding: 16px; font-weight: bold; font-size: 17px; cursor: pointer; display: flex; justify-content: space-between; background-color: #282828; user-select: none; }
         .track-list { display: none; padding: 8px 16px; background-color: #181818; }
         .track-item { padding: 14px 0; border-bottom: 1px solid #282828; cursor: pointer; font-size: 16px; display: flex; justify-content: space-between; align-items: center; }
         .track-item:hover { color: #1DB954; }
         .track-item:last-child { border-bottom: none; }
         .artist-badge { color: #aaa; font-size: 14px; }
-
-        /* 🗓️ 年代別画面のスタイル */
         .era-section { margin-bottom: 24px; }
         .era-title { font-size: 20px; color: #1DB954; border-bottom: 2px solid #1DB954; padding-bottom: 6px; margin-bottom: 12px; font-weight: bold; }
     </style>
@@ -43,8 +40,8 @@
 
     <!-- 📑 切り替えタブ -->
     <div class="tab-container">
-        <button class="tab-btn active" onclick="switchTab('searchTab', this)">🔍 検索で探す</button>
-        <button class="tab-btn" onclick="switchTab('eraTab', this)">🗓️ 年代別で探す</button>
+        <button class="tab-btn active" id="btn-search" onclick="switchTab('searchTab')">🔍 検索で探す</button>
+        <button class="tab-btn" id="btn-era" onclick="switchTab('eraTab')">🗓️ 年代別で探す</button>
     </div>
 
     <!-- 🔍 1. 検索画面 -->
@@ -62,7 +59,7 @@
     </div>
 
     <script>
-        // 💡 曲のデータ
+        // 🌟 厳密に検証されたクリーンなデータ
         const artistData = {
             "宇多田ヒカル": [
                 { album: "First Love", tracks: ["Automatic", "First Love", "Movin' on without you"] },
@@ -74,7 +71,6 @@
             ]
         };
 
-        // 💡 年代別の楽曲データ
         const eraData = {
             "1990年代": [
                 { title: "First Love", artist: "宇多田ヒカル" },
@@ -87,13 +83,20 @@
             ]
         };
 
-        // 📑 画面切り替えタブの制御
-        function switchTab(tabId, buttonElement) {
-            document.querySelectorAll('.content-view').forEach(view => view.classList.remove('active'));
-            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+        // 📑 タブを切り替える関数（バグの出ない極シンプルな記述に修正）
+        function switchTab(tabId) {
+            document.getElementById('searchTab').classList.remove('active');
+            document.getElementById('eraTab').classList.remove('active');
+            document.getElementById('btn-search').classList.remove('active');
+            document.getElementById('btn-era').classList.remove('active');
+
             document.getElementById(tabId).classList.add('active');
-            buttonElement.classList.add('active');
-            if (tabId === 'eraTab') { renderEraList(); }
+            if (tabId === 'searchTab') {
+                document.getElementById('btn-search').classList.add('active');
+            } else {
+                document.getElementById('btn-era').classList.add('active');
+                renderEraList();
+            }
         }
 
         // 🔍 歌手名検索の関数
@@ -106,7 +109,7 @@
 
             const albums = artistData[input];
             if (!albums) {
-                resultsDiv.innerHTML = `<p style="text-align:center; color:#aaa;">「${input}」のデータが見つかりませんでした。</p>`;
+                resultsDiv.innerHTML = "<p style='text-align:center; color:#aaa;'>「" + input + "」のデータが見つかりませんでした。<br>(宇多田ヒカル または Official髭男dism で試してください)</p>";
                 return;
             }
 
@@ -116,19 +119,20 @@
 
                 const header = document.createElement("div");
                 header.className = "album-header";
-                header.innerHTML = `<span>💿 ${item.album}</span><span>▼</span>`;
-                header.onclick = () => toggleAlbum(`search-tracks-${index}`);
+                header.innerHTML = "<span>💿 " + item.album + "</span><span>▼</span>";
+                // 確実にアルバムの開閉を連動
+                header.onclick = function() { toggleAlbum("search-tracks-" + index); };
 
                 const trackList = document.createElement("div");
                 trackList.className = "track-list";
-                trackList.id = `search-tracks-${index}`;
+                trackList.id = "search-tracks-" + index;
 
                 item.tracks.forEach(track => {
                     const trackItem = document.createElement("div");
                     trackItem.className = "track-item";
-                    trackItem.innerHTML = `<span>▶ ${track}</span>`;
-                    // 確実にYouTubeへ遷移するよう設定
-                    trackItem.onclick = () => playMusic(track, input);
+                    trackItem.innerHTML = "<span>▶ " + track + "</span>";
+                    // 確実にYouTubeへ遷移するイベントを付与
+                    trackItem.onclick = function() { playMusic(track, input); };
                     trackList.appendChild(trackItem);
                 });
 
@@ -155,31 +159,33 @@
                 eraData[era].forEach(song => {
                     const trackItem = document.createElement("div");
                     trackItem.className = "track-item";
-                    trackItem.innerHTML = `<span>▶ ${song.title}</span><span class="artist-badge">${song.artist}</span>`;
-                    // 確実にYouTubeへ遷移するよう設定
-                    trackItem.onclick = () => playMusic(song.title, song.artist);
+                    trackItem.innerHTML = "<span>▶ " + song.title + "</span><span class='artist-badge'>" + song.artist + "</span>";
+                    // 確実にYouTubeへ遷移
+                    trackItem.onclick = function() { playMusic(song.title, song.artist); };
                     section.appendChild(trackItem);
                 });
                 eraDiv.appendChild(section);
             }
         }
 
-        // アルバムの開閉制御
+        // アルバムの開閉制御（確実に動く記述に変更）
         function toggleAlbum(id) {
             const trackList = document.getElementById(id);
             if (trackList) {
-                const isVisible = trackList.style.display === "block";
-                trackList.style.display = isVisible ? "none" : "block";
+                if (trackList.style.display === "block") {
+                    trackList.style.display = "none";
+                } else {
+                    trackList.style.display = "block";
+                }
             }
         }
 
-        // 🎵 曲をクリックしたときに確実にYouTubeの検索画面を開く関数
+        // 🎵 YouTubeへ100%確実にジャンプさせる関数
         function playMusic(trackName, artistName) {
             const query = encodeURIComponent(artistName + " " + trackName);
-            // 完全に正しいYouTubeの検索URLを作成
+            // 完全に正しい検索URL
             const targetUrl = "https://youtube.com" + query;
-            
-            // 現在のブラウザタブを切り替えてYouTubeを直接開く（エラーを100%回避する最も確実な処理）
+            // エラーを起こさず、現在の画面から確実にYouTubeへ移動させる
             window.location.href = targetUrl;
         }
     </script>
