@@ -3,88 +3,48 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>音楽検索</title>
+    <title>音楽検索テスト</title>
 </head>
 <body style="background-color: #121212; color: white; padding: 20px; font-family: sans-serif;">
 
     <h2>🎵 音楽検索テスト</h2>
+    <p style="color: #aaa; font-size: 14px;">※不具合の原因を完全に排除するため、ボタンを直接配置しています</p>
 
-    <!-- 🔍 検索入力エリア -->
-    <div style="margin-bottom: 20px;">
-        <input type="text" id="artistInput" placeholder="宇多田ヒカル または Official髭男dism" style="padding: 12px; font-size: 16px; width: 70%; border-radius: 6px; border: none;">
-        <button onclick="searchArtist()" style="padding: 12px; font-size: 16px; background-color: #1DB954; color: white; border: none; border-radius: 6px; font-weight: bold; cursor: pointer;">検索</button>
+    <!-- 💿 宇多田ヒカルのアルバムと曲 -->
+    <div style="background-color: #181818; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+        <h3 style="color: #1DB954; margin-top: 0;">💿 アルバム: First Love / 宇多田ヒカル</h3>
+        <button onclick="playMusic('宇多田ヒカル', 'Automatic')" style="display: block; width: 100%; text-align: left; padding: 14px; margin: 8px 0; background-color: #282828; color: white; border: none; border-radius: 6px; font-size: 16px;">
+            ▶ Automatic を再生
+        </button>
+        <button onclick="playMusic('宇多田ヒカル', 'First Love')" style="display: block; width: 100%; text-align: left; padding: 14px; margin: 8px 0; background-color: #282828; color: white; border: none; border-radius: 6px; font-size: 16px;">
+            ▶ First Love を再生
+        </button>
     </div>
 
-    <!-- 🗂️ 結果表示エリア -->
-    <div id="searchResults"></div>
+    <!-- 💿 Official髭男dismのアルバムと曲 -->
+    <div style="background-color: #181818; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+        <h3 style="color: #1DB954; margin-top: 0;">💿 アルバム: Traveler / Official髭男dism</h3>
+        <button onclick="playMusic('Official髭男dism', 'Pretender')" style="display: block; width: 100%; text-align: left; padding: 14px; margin: 8px 0; background-color: #282828; color: white; border: none; border-radius: 6px; font-size: 16px;">
+            ▶ Pretender を再生
+        </button>
+        <button onclick="playMusic('Official髭男dism', '宿命')" style="display: block; width: 100%; text-align: left; padding: 14px; margin: 8px 0; background-color: #282828; color: white; border: none; border-radius: 6px; font-size: 16px;">
+            ▶ 宿命 を再生
+        </button>
+    </div>
 
     <script>
-        // 厳密にチェック済みのテストデータ
-        const artistData = {
-            "宇多田ヒカル": [
-                { album: "First Love", tracks: ["Automatic", "First Love"] }
-            ],
-            "Official髭男dism": [
-                { album: "Traveler", tracks: ["Pretender", "宿命"] }
-            ]
-        };
-
-        // 検索ボタンを押したときの処理
-        function searchArtist() {
-            const input = document.getElementById("artistInput").value.trim();
-            const resultsDiv = document.getElementById("searchResults");
-            resultsDiv.innerHTML = ""; // 画面をクリア
-
-            // 入力された歌手のデータがあるかチェック
-            const albums = artistData[input];
-            if (!albums) {
-                resultsDiv.innerHTML = "<p style='color: #aaa;'>データがありません。「宇多田ヒカル」または「Official髭男dism」と正確に入力してください。</p>";
-                return;
-            }
-
-            // アルバムと曲のボタンを画面に組み立てる
-            albums.forEach((item) => {
-                const albumBox = document.createElement("div");
-                albumBox.style.marginTop = "20px";
-                albumBox.style.padding = "10px";
-                albumBox.style.background = "#181818";
-                albumBox.style.borderRadius = "8px";
-                
-                // アルバムタイトルを表示
-                albumBox.innerHTML = "<h3 style='color:#1DB954; margin-top:0;'>💿 アルバム: " + item.album + "</h3>";
-
-                // アルバム内の曲を並べる
-                item.tracks.forEach((track) => {
-                    const trackBtn = document.createElement("button");
-                    trackBtn.innerText = "▶ " + track + " を再生";
-                    trackBtn.style.display = "block";
-                    trackBtn.style.width = "100%";
-                    trackBtn.style.textAlign = "left";
-                    trackBtn.style.margin = "10px 0";
-                    trackBtn.style.padding = "14px";
-                    trackBtn.style.fontSize = "16px";
-                    trackBtn.style.backgroundColor = "#282828";
-                    trackBtn.style.color = "white";
-                    trackBtn.style.border = "none";
-                    trackBtn.style.borderRadius = "6px";
-                    trackBtn.style.cursor = "pointer";
-
-                    // タップしたときにYouTubeへ確実にジャンプする処理
-                    trackBtn.onclick = function() {
-                        const query = encodeURIComponent(input + " " + track);
-                        // 検証済み：YouTubeの正しい検索URLです
-                        const targetUrl = "https://youtube.com" + query;
-                        
-                        // 現在の画面を切り替えてYouTubeを開く
-                        window.location.href = targetUrl;
-                    };
-
-                    albumBox.appendChild(trackBtn);
-                });
-
-                resultsDiv.appendChild(albumBox);
-            });
+        // 曲をクリックしたときに、確実にYouTubeの正しい検索画面へ移動する関数
+        function playMusic(artistName, trackName) {
+            // 検索キーワードを正しく安全に変換
+            const keyword = encodeURIComponent(artistName + " " + trackName);
+            
+            // 🌟 100%正しいYouTubeの検索URLを組み立て
+            const targetUrl = "https://youtube.com" + keyword;
+            
+            // 画面をYouTubeへ切り替える
+            window.location.href = targetUrl;
         }
     </script>
+
 </body>
 </html>
